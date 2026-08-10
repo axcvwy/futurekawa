@@ -180,6 +180,31 @@ def creer_alerte(
     )
 
 
+def resoudre_alertes_retablies(
+    db: Session,
+    *,
+    entrepot: Entrepot,
+    capteur: Capteur,
+    types_alerte: list[str],
+) -> None:
+    """Clôture les alertes dont la condition est redevenue normale (statut RESOLUE)."""
+    maintenant = datetime.now(timezone.utc)
+    ouvertes = (
+        db.query(Alerte)
+        .filter(
+            Alerte.entrepot_id == entrepot.id,
+            Alerte.capteur_id == capteur.id,
+            Alerte.type_alerte.in_(types_alerte),
+            Alerte.statut.in_(["ACTIVE", "PRISE_EN_COMPTE"]),
+        )
+        .all()
+    )
+    for alerte in ouvertes:
+        alerte.statut = "RESOLUE"
+        alerte.date_resolution = maintenant
+        db.add(alerte)
+
+
 def detecter_anomalies_conditions(
     db: Session,
     *,
@@ -235,6 +260,13 @@ def detecter_anomalies_conditions(
             seuil_minimum=t_min,
             seuil_maximum=t_max,
         )
+    elif temperature <= t_max and temperature >= t_min:
+        resoudre_alertes_retablies(
+            db,
+            entrepot=entrepot,
+            capteur=capteur,
+            types_alerte=["TEMPERATURE_ELEVEE", "TEMPERATURE_BASSE"],
+        )
 
     if humidite > h_max:
         creer_alerte(
@@ -267,6 +299,13 @@ def detecter_anomalies_conditions(
             valeur_detectee=humidite,
             seuil_minimum=h_min,
             seuil_maximum=h_max,
+        )
+    elif humidite <= h_max and humidite >= h_min:
+        resoudre_alertes_retablies(
+            db,
+            entrepot=entrepot,
+            capteur=capteur,
+            types_alerte=["HUMIDITE_ELEVEE", "HUMIDITE_BASSE"],
         )
 
 
