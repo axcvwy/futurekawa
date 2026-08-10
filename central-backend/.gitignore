@@ -1,0 +1,18 @@
+# Python virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Byte-compiled / optimized / DLL files
+*.py[cod]
+*$py.class
+
+# VS Code
+.vscode/
+
+# Secrets locaux
+.env

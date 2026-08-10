@@ -1,0 +1,120 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system FutureKawa (porté de la maquette lovable).
+ * Le bloc @theme inline associe les propriétés CSS aux utilitaires Tailwind
+ * (ex : --color-primary -> bg-primary, text-primary).
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-temperature: var(--temperature);
+  --color-humidite: var(--humidite);
+  --font-display: var(--font-titre);
+  --font-sans: var(--font-corps);
+}
+
+:root {
+  --radius: 0.5rem;
+  --background: oklch(0.982 0.012 84);
+  --foreground: oklch(0.245 0.032 55);
+  --card: oklch(0.997 0.005 90);
+  --card-foreground: oklch(0.245 0.032 55);
+  --popover: oklch(0.997 0.005 90);
+  --popover-foreground: oklch(0.245 0.032 55);
+  --primary: oklch(0.38 0.072 48);
+  --primary-foreground: oklch(0.98 0.012 84);
+  --secondary: oklch(0.94 0.022 82);
+  --secondary-foreground: oklch(0.32 0.045 52);
+  --muted: oklch(0.945 0.016 84);
+  --muted-foreground: oklch(0.505 0.028 60);
+  --accent: oklch(0.62 0.115 145);
+  --accent-foreground: oklch(0.98 0.012 84);
+  --destructive: oklch(0.55 0.19 27);
+  --destructive-foreground: oklch(0.98 0.012 84);
+  --warning: oklch(0.72 0.15 70);
+  --warning-foreground: oklch(0.25 0.05 60);
+  --success: oklch(0.6 0.12 150);
+  --success-foreground: oklch(0.98 0.012 84);
+  --temperature: oklch(0.62 0.19 35);
+  --humidite: oklch(0.58 0.12 230);
+  --border: oklch(0.9 0.018 80);
+  --input: oklch(0.9 0.018 80);
+  --ring: oklch(0.55 0.09 50);
+  --chart-1: oklch(0.62 0.19 35);
+  --chart-2: oklch(0.58 0.12 230);
+  --chart-3: oklch(0.62 0.115 145);
+  --chart-4: oklch(0.72 0.15 70);
+  --chart-5: oklch(0.45 0.08 300);
+  --gradient-cafe: linear-gradient(135deg, oklch(0.32 0.055 48) 0%, oklch(0.44 0.085 55) 60%, oklch(0.5 0.09 90) 100%);
+  --shadow-carte: 0 1px 2px oklch(0.3 0.04 60 / 0.06), 0 8px 24px oklch(0.3 0.04 60 / 0.07);
+  --font-titre: "Fraunces", Georgia, serif;
+  --font-corps: "Inter", system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-corps);
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-titre);
+    letter-spacing: -0.015em;
+  }
+}
+
+@utility surface-carte {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-carte);
+}
+
+@utility banniere-cafe {
+  background-image: var(--gradient-cafe);
+  color: var(--color-primary-foreground);
+}
