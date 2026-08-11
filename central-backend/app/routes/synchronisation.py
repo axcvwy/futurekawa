@@ -40,9 +40,12 @@ def get_synchronisation(
     run = db.get(Synchronisation, synchronisation_id)
     if run is None:
         raise HTTPException(status_code=404, detail="Exécution de synchronisation introuvable")
-    if appliquer_filtre_pays(db.query(Synchronisation), Synchronisation, utilisateur).filter(
-        Synchronisation.id == run.id
-    ).first() is None:
+    if (
+        appliquer_filtre_pays(db.query(Synchronisation), Synchronisation, utilisateur)
+        .filter(Synchronisation.id == run.id)
+        .first()
+        is None
+    ):
         raise HTTPException(status_code=403, detail="Accès refusé : synchronisation hors de votre périmètre")
     return run
 

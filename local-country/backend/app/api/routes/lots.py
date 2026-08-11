@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -25,12 +24,12 @@ class LotCreate(BaseModel):
 
 
 class LotUpdate(BaseModel):
-    code_lot: Optional[str] = None
-    entrepot_id: Optional[UUID] = None
-    produit: Optional[str] = None
-    quantite_kg: Optional[float] = None
-    date_stockage: Optional[date] = None
-    statut: Optional[str] = None
+    code_lot: str | None = None
+    entrepot_id: UUID | None = None
+    produit: str | None = None
+    quantite_kg: float | None = None
+    date_stockage: date | None = None
+    statut: str | None = None
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -47,11 +46,11 @@ def create_lot(lot: LotCreate, db: Session = Depends(get_db)):
 
 @router.get("/")
 def list_lots(
-    entrepot_id: Optional[UUID] = None,
-    statut: Optional[str] = None,
-    mis_a_jour_depuis: Optional[datetime] = None,
-    limit: Optional[int] = None,
-    offset: Optional[int] = None,
+    entrepot_id: UUID | None = None,
+    statut: str | None = None,
+    mis_a_jour_depuis: datetime | None = None,
+    limit: int | None = None,
+    offset: int | None = None,
     db: Session = Depends(get_db),
 ):
     limit, offset = get_pagination(limit, offset)
@@ -63,12 +62,7 @@ def list_lots(
     if mis_a_jour_depuis is not None:
         query = query.filter(Lot.mis_a_jour_le > mis_a_jour_depuis)
     total = query.count()
-    items = (
-        query.order_by(Lot.mis_a_jour_le.asc())
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
+    items = query.order_by(Lot.mis_a_jour_le.asc()).offset(offset).limit(limit).all()
     return paginated_response(items, total, limit, offset)
 
 
@@ -95,9 +89,12 @@ def update_lot(
     lot = db.get(Lot, lot_id)
     if not lot:
         raise HTTPException(status_code=404, detail="Lot introuvable")
-    if payload.entrepot_id is not None and payload.entrepot_id != lot.entrepot_id:
-        if not db.get(Entrepot, payload.entrepot_id):
-            raise HTTPException(status_code=404, detail="Entrepôt non trouvé")
+    if (
+        payload.entrepot_id is not None
+        and payload.entrepot_id != lot.entrepot_id
+        and not db.get(Entrepot, payload.entrepot_id)
+    ):
+        raise HTTPException(status_code=404, detail="Entrepôt non trouvé")
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(lot, field, value)
     db.commit()

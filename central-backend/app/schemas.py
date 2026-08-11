@@ -239,7 +239,6 @@ class SynchronisationOut(BaseModel):
     mis_a_jour_le: datetime
 
 
-
 class PaysRef(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -280,7 +279,6 @@ class EntrepotDetailOut(EntrepotOut):
     exploitation: ExploitationRef | None = None
 
 
-
 class PaysUpdate(BaseModel):
     actif: bool | None = None
     intervalle_sync_secondes: int | None = None
@@ -298,7 +296,6 @@ class ExploitationCreate(BaseModel):
 class AlerteUpdate(BaseModel):
     statut: str
     commentaire_resolution: str | None = None
-
 
 
 class LoginRequest(BaseModel):

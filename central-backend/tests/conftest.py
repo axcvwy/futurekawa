@@ -5,11 +5,11 @@ Utilise une base PostgreSQL dédiée (futurekawa_central_test) sur le Postgres l
 pour isoler les tests de la base Supabase de production.
 """
 
+import asyncio
 import os
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from uuid import uuid4
 
-import asyncio
 import pytest
 from fastapi.testclient import TestClient
 
@@ -19,19 +19,18 @@ os.environ["DATABASE_URL"] = os.getenv(
     "postgresql+psycopg2://futurekawa:futurekawa@localhost:5432/futurekawa_central_test",
 )
 
-from app.database.db import Base, SessionLocal, engine, get_db  # noqa: E402
-from app.main import app  # noqa: E402
-
-from app.core.security import hacher_mot_de_passe  # noqa: E402
-from app.models.alerte import Alerte  # noqa: E402
-from app.models.capteur import Capteur  # noqa: E402
-from app.models.entrepot import Entrepot  # noqa: E402
-from app.models.exploitation import Exploitation  # noqa: E402
-from app.models.lot import Lot  # noqa: E402
-from app.models.mesure import Mesure  # noqa: E402
-from app.models.pays import Pays  # noqa: E402
-from app.models.synchronisation import Synchronisation  # noqa: E402
-from app.models.utilisateur import Utilisateur  # noqa: E402
+from app.core.security import hacher_mot_de_passe
+from app.database.db import Base, SessionLocal, engine, get_db
+from app.main import app
+from app.models.alerte import Alerte
+from app.models.capteur import Capteur
+from app.models.entrepot import Entrepot
+from app.models.exploitation import Exploitation
+from app.models.lot import Lot
+from app.models.mesure import Mesure
+from app.models.pays import Pays
+from app.models.synchronisation import Synchronisation
+from app.models.utilisateur import Utilisateur
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -181,8 +180,8 @@ def entrepot_bra(exploitation_bra) -> Entrepot:
             temperature_max_c=32.0,
             humidite_min_pct=53.0,
             humidite_max_pct=57.0,
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(e)
         db.commit()
@@ -202,8 +201,8 @@ def capteur_bra(entrepot_bra) -> Capteur:
             type_capteur="DHT22",
             statut="ACTIF",
             frequence_mesure_secondes=60,
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(c)
         db.commit()
@@ -223,8 +222,8 @@ def lot_bra(entrepot_bra) -> Lot:
             quantite_kg=1200.0,
             date_stockage=date(2024, 1, 10),
             statut="EN_STOCK",
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(lot)
         db.commit()
@@ -248,10 +247,10 @@ def alerte_bra(entrepot_bra, capteur_bra, lot_bra) -> Alerte:
             valeur_detectee=34.5,
             seuil_minimum=26.0,
             seuil_maximum=32.0,
-            date_declenchement=datetime.now(timezone.utc),
+            date_declenchement=datetime.now(UTC),
             email_envoye=False,
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(a)
         db.commit()
@@ -259,7 +258,9 @@ def alerte_bra(entrepot_bra, capteur_bra, lot_bra) -> Alerte:
         return a
 
 
-def creer_utilisateur(email: str, role: str, mot_de_passe: str = "motdepasse1", actif: bool = True, **perimetre) -> Utilisateur:
+def creer_utilisateur(
+    email: str, role: str, mot_de_passe: str = "motdepasse1", actif: bool = True, **perimetre
+) -> Utilisateur:
     """Helper : crée un utilisateur directement en base (les rôles testés)."""
     with SessionLocal() as db:
         u = Utilisateur(

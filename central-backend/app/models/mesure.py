@@ -1,5 +1,5 @@
 # app/models/mesure.py
-from sqlalchemy import Column, DateTime, ForeignKey, Numeric, String, UniqueConstraint, Uuid, func, Index
+from sqlalchemy import Column, DateTime, ForeignKey, Index, Numeric, String, UniqueConstraint, Uuid, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 

@@ -11,10 +11,9 @@ En cas d'alerte, un e-mail est envoyé au responsable d'exploitation du pays con
 import asyncio
 import os
 import smtplib
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Optional
 
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
@@ -29,7 +28,8 @@ from app.models.pays import Pays
 load_dotenv()
 
 
-#  Envoi d'e-mail 
+#  Envoi d'e-mail
+
 
 def send_real_email(to_email: str, subject: str, body: str) -> bool:
     """Se connecte au serveur SMTP et envoie un e-mail d'alerte.
@@ -73,13 +73,14 @@ def send_real_email(to_email: str, subject: str, body: str) -> bool:
         return False
 
 
-#  Configuration pays 
+#  Configuration pays
 
-def get_pays_config(db: Session, code_pays: str) -> Optional[Pays]:
+
+def get_pays_config(db: Session, code_pays: str) -> Pays | None:
     return db.query(Pays).filter(Pays.code_iso == code_pays).first()
 
 
-def get_bande_pays(db: Session, code_pays: str) -> Optional[dict]:
+def get_bande_pays(db: Session, code_pays: str) -> dict | None:
     """Bande idéale du pays : cible ± tolérance. None si non configuré."""
     pays = get_pays_config(db, code_pays)
     if not pays:
@@ -104,20 +105,21 @@ def _destinataire_alerte(db: Session, entrepot: Entrepot) -> tuple[str, str]:
     return (None, entrepot.nom_responsable)
 
 
-#  Création d'une alerte 
+#  Création d'une alerte
+
 
 def creer_alerte(
     db: Session,
     *,
     entrepot: Entrepot,
-    capteur: Optional[Capteur],
-    lot: Optional[Lot],
+    capteur: Capteur | None,
+    lot: Lot | None,
     type_alerte: str,
     niveau: str,
     message: str,
-    valeur_detectee: Optional[float],
-    seuil_minimum: Optional[float],
-    seuil_maximum: Optional[float],
+    valeur_detectee: float | None,
+    seuil_minimum: float | None,
+    seuil_maximum: float | None,
 ) -> None:
     """Crée une alerte et tente l'envoi de l'e-mail au responsable.
 
@@ -175,7 +177,7 @@ def creer_alerte(
             seuil_minimum=seuil_minimum,
             seuil_maximum=seuil_maximum,
             email_envoye=email_envoye,
-            date_email=datetime.now(timezone.utc) if email_envoye else None,
+            date_email=datetime.now(UTC) if email_envoye else None,
         )
     )
 
@@ -188,7 +190,7 @@ def resoudre_alertes_retablies(
     types_alerte: list[str],
 ) -> None:
     """Clôture les alertes dont la condition est redevenue normale (statut RESOLUE)."""
-    maintenant = datetime.now(timezone.utc)
+    maintenant = datetime.now(UTC)
     ouvertes = (
         db.query(Alerte)
         .filter(
@@ -210,7 +212,7 @@ def detecter_anomalies_conditions(
     *,
     entrepot: Entrepot,
     capteur: Capteur,
-    lot: Optional[Lot],
+    lot: Lot | None,
     temperature: float,
     humidite: float,
 ) -> None:
@@ -222,7 +224,7 @@ def detecter_anomalies_conditions(
     if bande is None:
         t_min, t_max = float(entrepot.temperature_min_c), float(entrepot.temperature_max_c)
         h_min, h_max = float(entrepot.humidite_min_pct), float(entrepot.humidite_max_pct)
-        reference = f"bande de l'entrepôt"
+        reference = "bande de l'entrepôt"
     else:
         t_min, t_max = bande["t_min"], bande["t_max"]
         h_min, h_max = bande["h_min"], bande["h_max"]
@@ -236,10 +238,7 @@ def detecter_anomalies_conditions(
             lot=lot,
             type_alerte="TEMPERATURE_ELEVEE",
             niveau="ELEVE",
-            message=(
-                f"Température hors {reference} : {temperature}°C mesurés "
-                f"(Bande : {t_min}–{t_max}°C)."
-            ),
+            message=(f"Température hors {reference} : {temperature}°C mesurés (Bande : {t_min}–{t_max}°C)."),
             valeur_detectee=temperature,
             seuil_minimum=t_min,
             seuil_maximum=t_max,
@@ -252,10 +251,7 @@ def detecter_anomalies_conditions(
             lot=lot,
             type_alerte="TEMPERATURE_BASSE",
             niveau="MOYEN",
-            message=(
-                f"Température sous {reference} : {temperature}°C mesurés "
-                f"(Bande : {t_min}–{t_max}°C)."
-            ),
+            message=(f"Température sous {reference} : {temperature}°C mesurés (Bande : {t_min}–{t_max}°C)."),
             valeur_detectee=temperature,
             seuil_minimum=t_min,
             seuil_maximum=t_max,
@@ -276,10 +272,7 @@ def detecter_anomalies_conditions(
             lot=lot,
             type_alerte="HUMIDITE_ELEVEE",
             niveau="ELEVE",
-            message=(
-                f"Humidité hors {reference} : {humidite}% mesurés "
-                f"(Bande : {h_min}–{h_max}%)."
-            ),
+            message=(f"Humidité hors {reference} : {humidite}% mesurés (Bande : {h_min}–{h_max}%)."),
             valeur_detectee=humidite,
             seuil_minimum=h_min,
             seuil_maximum=h_max,
@@ -292,10 +285,7 @@ def detecter_anomalies_conditions(
             lot=lot,
             type_alerte="HUMIDITE_BASSE",
             niveau="MOYEN",
-            message=(
-                f"Humidité sous {reference} : {humidite}% mesurés "
-                f"(Bande : {h_min}–{h_max}%)."
-            ),
+            message=(f"Humidité sous {reference} : {humidite}% mesurés (Bande : {h_min}–{h_max}%)."),
             valeur_detectee=humidite,
             seuil_minimum=h_min,
             seuil_maximum=h_max,
@@ -309,7 +299,8 @@ def detecter_anomalies_conditions(
         )
 
 
-#  Lots trop anciens (> 365 jours) 
+#  Lots trop anciens (> 365 jours)
+
 
 def verifier_lots_anciens(db: Session) -> int:
     """Crée une alerte LOT_TROP_ANCIEN pour chaque lot > 365 jours de stockage.
@@ -318,7 +309,7 @@ def verifier_lots_anciens(db: Session) -> int:
     Un lot EN_STOCK trop ancien passe au statut PERIME.
     Retourne le nombre d'alertes créées.
     """
-    seuil_date = datetime.now(timezone.utc).date() - timedelta(days=365)
+    seuil_date = datetime.now(UTC).date() - timedelta(days=365)
     lots = (
         db.query(Lot)
         .filter(
@@ -329,7 +320,7 @@ def verifier_lots_anciens(db: Session) -> int:
     )
 
     crees = 0
-    maintenant = datetime.now(timezone.utc)
+    maintenant = datetime.now(UTC)
     for lot in lots:
         existante = (
             db.query(Alerte)
@@ -374,10 +365,7 @@ def verifier_lots_anciens(db: Session) -> int:
                 type_alerte="LOT_TROP_ANCIEN",
                 niveau="MOYEN",
                 statut="ACTIVE",
-                message=(
-                    f"Lot stocké depuis {jours} jours ({lot.date_stockage}), "
-                    f"seuil de 365 jours dépassé."
-                ),
+                message=(f"Lot stocké depuis {jours} jours ({lot.date_stockage}), seuil de 365 jours dépassé."),
                 valeur_detectee=jours,
                 seuil_minimum=365,
                 seuil_maximum=None,

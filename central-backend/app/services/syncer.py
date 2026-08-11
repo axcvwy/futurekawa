@@ -6,6 +6,7 @@ les consolide dans la base PostgreSQL centrale via des upserts idempotents (pays
 Ordre de synchro imposé par les contraintes de clés étrangères :
 1. entrepots  2. capteurs  3. lots  4. mesures  5. alertes
 """
+
 import datetime
 import logging
 import uuid
@@ -106,8 +107,7 @@ def fetch_all(pays: Pays, resource: str, cursor: datetime.datetime | None):
         response.raise_for_status()
         payload = response.json()
         items = extract_items(payload)
-        for item in items:
-            yield item
+        yield from items
         if not has_more_pages(payload, items, params["offset"], SYNC_PAGE_SIZE):
             break
         params["offset"] += len(items)
@@ -145,10 +145,14 @@ class _SyncState:
             return None
         key = str(local_id)
         if key not in cache:
-            row = self.db.query(model).filter(
-                model.pays_id == self.pays.id,
-                model.source_id == local_id,
-            ).first()
+            row = (
+                self.db.query(model)
+                .filter(
+                    model.pays_id == self.pays.id,
+                    model.source_id == local_id,
+                )
+                .first()
+            )
             cache[key] = row.id if row else None
         return cache[key]
 
@@ -166,10 +170,14 @@ class _SyncState:
         local_id = to_uuid(source_id)
         if local_id is None:
             return None
-        row = self.db.query(model).filter(
-            model.pays_id == self.pays.id,
-            model.source_id == local_id,
-        ).first()
+        row = (
+            self.db.query(model)
+            .filter(
+                model.pays_id == self.pays.id,
+                model.source_id == local_id,
+            )
+            .first()
+        )
         if row is None:
             row = model(pays_id=self.pays.id, source_id=local_id)
             self.db.add(row)
@@ -385,7 +393,7 @@ def compute_cursor(db: Session, pays: Pays) -> datetime.datetime | None:
     if ref is None:
         return None
     if ref.tzinfo is None:
-        ref = ref.replace(tzinfo=datetime.timezone.utc)
+        ref = ref.replace(tzinfo=datetime.UTC)
     return ref - datetime.timedelta(seconds=SYNC_OVERLAP_SECONDS)
 
 
@@ -394,7 +402,7 @@ def synchronize_pays(db: Session, pays: Pays, declencheur: str = "AUTOMATIQUE") 
 
     La transaction est laissée au soin de l'appelant (commit/rollback).
     """
-    now = datetime.datetime.now(datetime.timezone.utc)
+    now = datetime.datetime.now(datetime.UTC)
     cursor = compute_cursor(db, pays)
 
     run = Synchronisation(
@@ -424,7 +432,7 @@ def synchronize_pays(db: Session, pays: Pays, declencheur: str = "AUTOMATIQUE") 
         setattr(run, _COUNT_COLUMNS[name][0], lus)
         setattr(run, _COUNT_COLUMNS[name][1], ecrits)
 
-    run.terminee_le = datetime.datetime.now(datetime.timezone.utc)
+    run.terminee_le = datetime.datetime.now(datetime.UTC)
     run.curseur_arrivee = state.curseur_arrivee
     run.erreur = erreur
 

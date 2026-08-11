@@ -10,20 +10,21 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise RuntimeError(
-        "DATABASE_URL manquante. Copiez .env.example vers .env puis renseignez la chaîne de connexion PostgreSQL centrale."
+        "DATABASE_URL manquante. Copiez .env.example vers .env "
+        "puis renseignez la chaîne de connexion PostgreSQL centrale."
     )
 
 
 # Paramètres de synchronisation (non sensibles, valeurs par défaut raisonnables)
-SYNC_INTERVAL_SECONDS = int(os.getenv("SYNC_INTERVAL_SECONDS", "300"))       # 5 minutes
-SYNC_OVERLAP_SECONDS = int(os.getenv("SYNC_OVERLAP_SECONDS", "120"))         # Fenêtre de recouvrement anti-frontière
-SYNC_PAGE_SIZE = int(os.getenv("SYNC_PAGE_SIZE", "100"))                     # Pagination par page
-SYNC_REQUEST_TIMEOUT = int(os.getenv("SYNC_REQUEST_TIMEOUT", "10"))          # Timeout HTTP par appel local
-SCHEDULER_POLL_SECONDS = int(os.getenv("SCHEDULER_POLL_SECONDS", "30"))      # Cadence de réveil du planificateur
+SYNC_INTERVAL_SECONDS = int(os.getenv("SYNC_INTERVAL_SECONDS", "300"))  # 5 minutes
+SYNC_OVERLAP_SECONDS = int(os.getenv("SYNC_OVERLAP_SECONDS", "120"))  # Fenêtre de recouvrement anti-frontière
+SYNC_PAGE_SIZE = int(os.getenv("SYNC_PAGE_SIZE", "100"))  # Pagination par page
+SYNC_REQUEST_TIMEOUT = int(os.getenv("SYNC_REQUEST_TIMEOUT", "10"))  # Timeout HTTP par appel local
+SCHEDULER_POLL_SECONDS = int(os.getenv("SCHEDULER_POLL_SECONDS", "30"))  # Cadence de réveil du planificateur
 
 # Authentification (JWT) de la console Siège
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-secret-a-changer-en-production")
-JWT_EXPIRATION_MINUTES = int(os.getenv("JWT_EXPIRATION_MINUTES", "480"))     # 8 h
+JWT_EXPIRATION_MINUTES = int(os.getenv("JWT_EXPIRATION_MINUTES", "480"))  # 8 h
 
 
 PAYS_DEFAULTS = [

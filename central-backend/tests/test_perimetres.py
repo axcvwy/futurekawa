@@ -1,7 +1,7 @@
 # tests/test_perimetres.py
 """Restriction des données par rôle : pays / entrepôt / lots / alertes."""
 
-import pytest
+from datetime import UTC
 
 
 def test_admin_voit_tous_les_pays(client, en_tete_admin, pays_reference):
@@ -21,7 +21,7 @@ def test_referent_qualite_ne_voit_que_son_pays(client, utilisateurs):
 
 def test_responsable_entrepot_scope_entrepot(client, utilisateurs, entrepot_bra, exploitation_bra, pays_reference):
     # Création d'un second entrepôt BRA pour vérifier la restriction
-    from datetime import datetime, timezone
+    from datetime import datetime
     from uuid import uuid4
 
     from app.database.db import SessionLocal
@@ -41,8 +41,8 @@ def test_responsable_entrepot_scope_entrepot(client, utilisateurs, entrepot_bra,
             temperature_max_c=32.0,
             humidite_min_pct=53.0,
             humidite_max_pct=57.0,
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(autre)
         db.commit()
@@ -54,7 +54,7 @@ def test_responsable_entrepot_scope_entrepot(client, utilisateurs, entrepot_bra,
 
 
 def test_responsable_entrepot_scope_lots(client, utilisateurs, entrepot_bra, exploitation_bra, lot_bra, pays_reference):
-    from datetime import datetime, timezone
+    from datetime import datetime
     from uuid import uuid4
 
     from app.database.db import SessionLocal
@@ -75,8 +75,8 @@ def test_responsable_entrepot_scope_lots(client, utilisateurs, entrepot_bra, exp
             temperature_max_c=32.0,
             humidite_min_pct=53.0,
             humidite_max_pct=57.0,
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(autre_ent)
         db.flush()
@@ -89,25 +89,25 @@ def test_responsable_entrepot_scope_lots(client, utilisateurs, entrepot_bra, exp
             quantite_kg=500.0,
             date_stockage=__import__("datetime").date(2024, 2, 1),
             statut="EN_STOCK",
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(autre_lot)
         db.commit()
 
     reponse = client.get("/lots", headers=utilisateurs["resp_ent"])
-    codes = [l["code_lot"] for l in reponse.json()]
+    codes = [lot["code_lot"] for lot in reponse.json()]
     assert "LOT-BRA-2024-001" in codes
     assert "LOT-BRA-RIO-001" not in codes
 
 
 def test_lot_du_pays_col_invisible_pour_resp_bra(client, utilisateurs, pays_reference, entrepot_bra, lot_bra):
-    from datetime import datetime, timezone
+    from datetime import datetime
     from uuid import uuid4
 
     from app.database.db import SessionLocal
-    from app.models.exploitation import Exploitation
     from app.models.entrepot import Entrepot
+    from app.models.exploitation import Exploitation
     from app.models.lot import Lot
 
     with SessionLocal() as db:
@@ -134,8 +134,8 @@ def test_lot_du_pays_col_invisible_pour_resp_bra(client, utilisateurs, pays_refe
             temperature_max_c=29.0,
             humidite_min_pct=78.0,
             humidite_max_pct=82.0,
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(ent_col)
         db.flush()
@@ -148,20 +148,20 @@ def test_lot_du_pays_col_invisible_pour_resp_bra(client, utilisateurs, pays_refe
             quantite_kg=800.0,
             date_stockage=__import__("datetime").date(2024, 3, 5),
             statut="EN_STOCK",
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(lot_col)
         db.commit()
 
     reponse = client.get("/lots", headers=utilisateurs["resp_bra"])
-    codes = [l["code_lot"] for l in reponse.json()]
+    codes = [lot["code_lot"] for lot in reponse.json()]
     assert "LOT-BRA-2024-001" in codes
     assert "LOT-COL-001" not in codes
 
 
 def test_alerte_hors_perimetre_invisible(client, utilisateurs, pays_reference, entrepot_bra, alerte_bra):
-    from datetime import datetime, timezone
+    from datetime import datetime
     from uuid import uuid4
 
     from app.database.db import SessionLocal
@@ -178,8 +178,8 @@ def test_alerte_hors_perimetre_invisible(client, utilisateurs, pays_reference, e
             type_capteur="DHT22",
             statut="ACTIF",
             frequence_mesure_secondes=60,
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(capteur_col)
         db.flush()
@@ -196,10 +196,10 @@ def test_alerte_hors_perimetre_invisible(client, utilisateurs, pays_reference, e
             valeur_detectee=85.0,
             seuil_minimum=78.0,
             seuil_maximum=82.0,
-            date_declenchement=datetime.now(timezone.utc),
+            date_declenchement=datetime.now(UTC),
             email_envoye=False,
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(alerte_col)
         db.commit()
@@ -208,8 +208,10 @@ def test_alerte_hors_perimetre_invisible(client, utilisateurs, pays_reference, e
     assert all(a["pays"]["code_iso"] == "BRA" for a in reponse.json())
 
 
-def test_responsable_entrepot_ne_voit_que_ses_alertes(client, utilisateurs, alerte_bra, entrepot_bra, exploitation_bra, pays_reference):
-    from datetime import datetime, timezone
+def test_responsable_entrepot_ne_voit_que_ses_alertes(
+    client, utilisateurs, alerte_bra, entrepot_bra, exploitation_bra, pays_reference
+):
+    from datetime import datetime
     from uuid import uuid4
 
     from app.database.db import SessionLocal
@@ -230,8 +232,8 @@ def test_responsable_entrepot_ne_voit_que_ses_alertes(client, utilisateurs, aler
             temperature_max_c=32.0,
             humidite_min_pct=53.0,
             humidite_max_pct=57.0,
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(autre)
         db.flush()
@@ -248,10 +250,10 @@ def test_responsable_entrepot_ne_voit_que_ses_alertes(client, utilisateurs, aler
             valeur_detectee=400.0,
             seuil_minimum=365.0,
             seuil_maximum=None,
-            date_declenchement=datetime.now(timezone.utc),
+            date_declenchement=datetime.now(UTC),
             email_envoye=False,
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(alerte_autre)
         db.commit()

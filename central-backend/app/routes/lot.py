@@ -1,6 +1,5 @@
 # app/routes/lot.py
 import uuid
-from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -106,13 +105,7 @@ def get_lot_mesures(
     if requete.filter(Lot.id == lot.id).first() is None:
         raise HTTPException(status_code=403, detail="Accès refusé : lot hors de votre périmètre")
 
-    mesures = (
-        db.query(Mesure)
-        .filter(Mesure.lot_id == lot_id)
-        .order_by(Mesure.date_mesure.asc())
-        .limit(500)
-        .all()
-    )
+    mesures = db.query(Mesure).filter(Mesure.lot_id == lot_id).order_by(Mesure.date_mesure.asc()).limit(500).all()
     if not mesures and lot.entrepot_id:
         mesures = (
             db.query(Mesure)
@@ -170,7 +163,8 @@ def update_lot(
         if champs_interdits:
             raise HTTPException(
                 status_code=403,
-                detail=f"Le référent qualité ne peut modifier que le statut (champs refusés : {sorted(champs_interdits)})",
+                detail=f"Le référent qualité ne peut modifier que le statut "
+                f"(champs refusés : {sorted(champs_interdits)})",
             )
         if "statut" in corps and corps["statut"] not in {"EN_ALERTE", "CONFORME", "A_VERIFIER"}:
             raise HTTPException(
@@ -178,7 +172,7 @@ def update_lot(
                 detail="Statut autorisé pour le référent qualité : EN_ALERTE, CONFORME, A_VERIFIER",
             )
 
-    resultat = maj_lot_local(
+    maj_lot_local(
         db,
         pays_id=lot.pays_id,
         lot_central_id=lot.id,

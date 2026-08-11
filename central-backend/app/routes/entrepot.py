@@ -39,11 +39,7 @@ def create_entrepot(
     corps = payload.model_dump(exclude={"pays_id"})
     corps["code_pays"] = pays.code_iso
     resultat = creer_entrepot_local(db, pays_id=pays.id, corps=corps)
-    entrepot = (
-        db.query(Entrepot)
-        .filter(Entrepot.pays_id == pays.id, Entrepot.source_id == resultat["id"])
-        .first()
-    )
+    entrepot = db.query(Entrepot).filter(Entrepot.pays_id == pays.id, Entrepot.source_id == resultat["id"]).first()
     if entrepot is None:
         return resultat
     return entrepot
@@ -97,10 +93,7 @@ def update_entrepot(
     if entrepot is None:
         raise HTTPException(status_code=404, detail="Entrepôt introuvable")
 
-    if payload is not None:
-        corps = payload.model_dump(exclude_none=True)
-    else:
-        corps = {}
+    corps = payload.model_dump(exclude_none=True) if payload is not None else {}
     if corps:
         pays = db.get(Pays, entrepot.pays_id)
         if pays.mock:

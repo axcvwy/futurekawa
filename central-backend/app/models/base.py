@@ -3,8 +3,6 @@ from uuid import uuid4
 
 from sqlalchemy import Column, DateTime, Uuid, func
 
-from app.database.db import Base
-
 
 class UUIDTimestampMixin:
     """Identifiant UUID généré localement + horodatage UTC pour la synchro."""

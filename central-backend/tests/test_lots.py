@@ -1,6 +1,8 @@
 # tests/test_lots.py
 """Création / mise à jour des lots : proxy local + règles de rôle."""
 
+from datetime import UTC
+
 
 def test_creation_lot_interdite_pour_referent_qualite(client, utilisateurs, entrepot_bra):
     reponse = client.post(
@@ -89,10 +91,9 @@ def test_referent_qualite_statut_autorise_uniquement(client, utilisateurs, lot_b
 
 
 def test_resp_entrepot_creation_dans_son_entrepot_autorisee(client, utilisateurs, entrepot_bra, monkeypatch):
-    from datetime import datetime, timezone
+    from datetime import datetime
     from uuid import uuid4
 
-    from app.database.db import SessionLocal
     from app.models.lot import Lot
     from app.routes import lot as route_lot
 
@@ -106,8 +107,8 @@ def test_resp_entrepot_creation_dans_son_entrepot_autorisee(client, utilisateurs
             quantite_kg=corps["quantite_kg"],
             date_stockage=corps["date_stockage"],
             statut=corps.get("statut", "EN_STOCK"),
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(lot)
         db.commit()
@@ -131,7 +132,7 @@ def test_resp_entrepot_creation_dans_son_entrepot_autorisee(client, utilisateurs
 
 
 def test_resp_entrepot_creation_hors_entrepot_403(client, utilisateurs, entrepot_bra, exploitation_bra, pays_reference):
-    from datetime import datetime, timezone
+    from datetime import datetime
     from uuid import uuid4
 
     from app.database.db import SessionLocal
@@ -151,8 +152,8 @@ def test_resp_entrepot_creation_hors_entrepot_403(client, utilisateurs, entrepot
             temperature_max_c=32.0,
             humidite_min_pct=53.0,
             humidite_max_pct=57.0,
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(autre)
         db.commit()

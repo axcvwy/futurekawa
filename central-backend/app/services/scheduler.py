@@ -3,6 +3,7 @@
 Planificateur asynchrone : déclenche automatiquement la synchronisation des pays
 dont l'intervalle est dépassé (par défaut toutes les 5 minutes).
 """
+
 import asyncio
 import datetime
 import logging
@@ -19,7 +20,7 @@ def run_due_syncs() -> None:
     """Lance la synchro de chaque pays actif dont l'échéance est atteinte."""
     db = SessionLocal()
     try:
-        now = datetime.datetime.now(datetime.timezone.utc)
+        now = datetime.datetime.now(datetime.UTC)
         for pays in db.query(Pays).filter(Pays.actif.is_(True)).all():
             due = pays.derniere_sync_reussie_le is None
             if not due:

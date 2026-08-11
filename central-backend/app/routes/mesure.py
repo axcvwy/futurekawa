@@ -44,12 +44,7 @@ def list_mesures(
         query = query.filter(Mesure.date_mesure >= date_mesure_depuis)
     if date_mesure_jusqua is not None:
         query = query.filter(Mesure.date_mesure <= date_mesure_jusqua)
-    return (
-        query.order_by(Mesure.date_mesure.desc())
-        .offset(offset)
-        .limit(min(limit, 1000))
-        .all()
-    )
+    return query.order_by(Mesure.date_mesure.desc()).offset(offset).limit(min(limit, 1000)).all()
 
 
 @router.get("/{mesure_id}", response_model=MesureOut)

@@ -1,9 +1,7 @@
-from typing import Optional
-
 from fastapi import HTTPException, status
 
 
-def get_pagination(limit: Optional[int], offset: Optional[int]) -> tuple[int, int]:
+def get_pagination(limit: int | None, offset: int | None) -> tuple[int, int]:
     limit = limit or 100
     offset = offset or 0
     if limit <= 0 or limit > 1000:

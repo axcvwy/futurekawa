@@ -92,7 +92,8 @@ def _synchroniser_apres_ecriture(db: Session, pays: Pays) -> None:
         ) from exc
 
 
-#  Lots 
+#  Lots
+
 
 def creer_lot_local(db: Session, pays_id: uuid.UUID, entrepot_central_id: uuid.UUID, corps: dict) -> dict:
     """Crée un lot sur le backend local du pays puis resynchronise le Siège."""
@@ -143,7 +144,8 @@ def maj_lot_local(
     return resultat
 
 
-#  Entrepôts 
+#  Entrepôts
+
 
 def creer_entrepot_local(db: Session, pays_id: uuid.UUID, corps: dict) -> dict:
     pays = _pays_local(db.get(Pays, pays_id))
@@ -184,7 +186,8 @@ def supprimer_entrepot_local(db: Session, pays_id: uuid.UUID, entrepot_central_i
     db.commit()
 
 
-#  Capteurs 
+#  Capteurs
+
 
 def creer_capteur_local(db: Session, pays_id: uuid.UUID, entrepot_central_id: uuid.UUID, corps: dict) -> dict:
     pays = _pays_local(db.get(Pays, pays_id))

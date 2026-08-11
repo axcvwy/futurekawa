@@ -1,7 +1,6 @@
 # app/core/security.py
 import os
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
 import bcrypt
 import jwt
@@ -11,7 +10,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.database.db import get_db
-from app.models.utilisateur import ROLES, Utilisateur
+from app.models.utilisateur import Utilisateur
 
 load_dotenv()
 
@@ -22,7 +21,8 @@ TOKEN_EXPIRATION_MINUTES = int(os.getenv("JWT_EXPIRATION_MINUTES", "480"))  # 8 
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
-#  Hachage & vérification de mot de passe 
+#  Hachage & vérification de mot de passe
+
 
 def hacher_mot_de_passe(mot_de_passe: str) -> str:
     return bcrypt.hashpw(mot_de_passe.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -35,10 +35,11 @@ def verifier_mot_de_passe(mot_de_passe: str, hash_stocke: str) -> bool:
         return False
 
 
-#  JWT 
+#  JWT
+
 
 def creer_token(utilisateur: Utilisateur) -> str:
-    expiration = datetime.now(timezone.utc) + timedelta(minutes=TOKEN_EXPIRATION_MINUTES)
+    expiration = datetime.now(UTC) + timedelta(minutes=TOKEN_EXPIRATION_MINUTES)
     payload = {
         "sub": str(utilisateur.id),
         "email": utilisateur.email,
@@ -50,17 +51,18 @@ def creer_token(utilisateur: Utilisateur) -> str:
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def decoder_token(token: str) -> Optional[dict]:
+def decoder_token(token: str) -> dict | None:
     try:
         return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.PyJWTError:
         return None
 
 
-#  Dépendances FastAPI 
+#  Dépendances FastAPI
+
 
 def get_current_user(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     db: Session = Depends(get_db),
 ) -> Utilisateur:
     """Authentifie l'utilisateur via un JWT Bearer."""

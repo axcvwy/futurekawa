@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+tests/
+pytest.ini
+pyproject.toml
+.ruff_cache/
+*.log
+.git/

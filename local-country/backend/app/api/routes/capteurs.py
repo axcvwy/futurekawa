@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -25,12 +24,12 @@ class CapteurCreate(BaseModel):
 
 
 class CapteurUpdate(BaseModel):
-    entrepot_id: Optional[UUID] = None
-    reference: Optional[str] = None
-    topic_mqtt: Optional[str] = None
-    type_capteur: Optional[str] = None
-    statut: Optional[str] = None
-    frequence_mesure_secondes: Optional[int] = None
+    entrepot_id: UUID | None = None
+    reference: str | None = None
+    topic_mqtt: str | None = None
+    type_capteur: str | None = None
+    statut: str | None = None
+    frequence_mesure_secondes: int | None = None
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -47,11 +46,11 @@ def create_capteur(capteur: CapteurCreate, db: Session = Depends(get_db)):
 
 @router.get("/")
 def list_capteurs(
-    entrepot_id: Optional[UUID] = None,
-    statut: Optional[str] = None,
-    mis_a_jour_depuis: Optional[datetime] = None,
-    limit: Optional[int] = None,
-    offset: Optional[int] = None,
+    entrepot_id: UUID | None = None,
+    statut: str | None = None,
+    mis_a_jour_depuis: datetime | None = None,
+    limit: int | None = None,
+    offset: int | None = None,
     db: Session = Depends(get_db),
 ):
     limit, offset = get_pagination(limit, offset)
@@ -63,12 +62,7 @@ def list_capteurs(
     if mis_a_jour_depuis is not None:
         query = query.filter(Capteur.mis_a_jour_le > mis_a_jour_depuis)
     total = query.count()
-    items = (
-        query.order_by(Capteur.mis_a_jour_le.asc())
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
+    items = query.order_by(Capteur.mis_a_jour_le.asc()).offset(offset).limit(limit).all()
     return paginated_response(items, total, limit, offset)
 
 
@@ -89,9 +83,12 @@ def update_capteur(
     capteur = db.get(Capteur, capteur_id)
     if not capteur:
         raise HTTPException(status_code=404, detail="Capteur introuvable")
-    if payload.entrepot_id is not None and payload.entrepot_id != capteur.entrepot_id:
-        if not db.get(Entrepot, payload.entrepot_id):
-            raise HTTPException(status_code=404, detail="Entrepôt introuvable")
+    if (
+        payload.entrepot_id is not None
+        and payload.entrepot_id != capteur.entrepot_id
+        and not db.get(Entrepot, payload.entrepot_id)
+    ):
+        raise HTTPException(status_code=404, detail="Entrepôt introuvable")
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(capteur, field, value)
     db.commit()

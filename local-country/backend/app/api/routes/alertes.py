@@ -1,8 +1,7 @@
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -15,19 +14,19 @@ router = APIRouter(dependencies=[Depends(require_api_key)])
 
 
 class AlerteUpdate(BaseModel):
-    statut: Optional[str] = None
-    commentaire_resolution: Optional[str] = None
-    resolue_par: Optional[UUID] = None
+    statut: str | None = None
+    commentaire_resolution: str | None = None
+    resolue_par: UUID | None = None
 
 
 @router.get("/")
 def list_alertes(
-    statut: Optional[str] = None,
-    entrepot_id: Optional[UUID] = None,
-    type_alerte: Optional[str] = None,
-    mis_a_jour_depuis: Optional[datetime] = None,
-    limit: Optional[int] = None,
-    offset: Optional[int] = None,
+    statut: str | None = None,
+    entrepot_id: UUID | None = None,
+    type_alerte: str | None = None,
+    mis_a_jour_depuis: datetime | None = None,
+    limit: int | None = None,
+    offset: int | None = None,
     db: Session = Depends(get_db),
 ):
     limit, offset = get_pagination(limit, offset)
@@ -41,21 +40,14 @@ def list_alertes(
     if mis_a_jour_depuis is not None:
         query = query.filter(Alerte.mis_a_jour_le > mis_a_jour_depuis)
     total = query.count()
-    items = (
-        query.order_by(Alerte.date_declenchement.desc())
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
+    items = query.order_by(Alerte.date_declenchement.desc()).offset(offset).limit(limit).all()
     return paginated_response(items, total, limit, offset)
 
 
 @router.get("/actives")
 def list_active_alerts(db: Session = Depends(get_db)):
     """Alertes en cours (non résolues) pour le dashboard local."""
-    return db.query(Alerte).filter(Alerte.statut == "ACTIVE").order_by(
-        Alerte.date_declenchement.desc()
-    ).all()
+    return db.query(Alerte).filter(Alerte.statut == "ACTIVE").order_by(Alerte.date_declenchement.desc()).all()
 
 
 @router.get("/historique")

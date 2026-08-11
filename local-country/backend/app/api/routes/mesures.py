@@ -1,5 +1,4 @@
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -19,19 +18,19 @@ router = APIRouter(dependencies=[Depends(require_api_key)])
 
 
 class MesureCreate(BaseModel):
-    capteur_id: Optional[UUID] = None
-    topic_mqtt: Optional[str] = None
-    entrepot_id: Optional[UUID] = None
-    lot_id: Optional[UUID] = None
+    capteur_id: UUID | None = None
+    topic_mqtt: str | None = None
+    entrepot_id: UUID | None = None
+    lot_id: UUID | None = None
     source: str = "MQTT"
-    date_mesure: Optional[datetime] = None
+    date_mesure: datetime | None = None
     temperature_c: float
     humidite_pct: float
-    donnees_brutes: Optional[dict] = None
+    donnees_brutes: dict | None = None
 
 
 class MesureUpdate(BaseModel):
-    lot_id: Optional[UUID] = None
+    lot_id: UUID | None = None
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -41,11 +40,7 @@ def receive_mesure(mesure: MesureCreate, db: Session = Depends(get_db)):
     if mesure.capteur_id is not None:
         capteur = db.get(Capteur, mesure.capteur_id)
     elif mesure.topic_mqtt:
-        capteur = (
-            db.query(Capteur)
-            .filter(Capteur.topic_mqtt == mesure.topic_mqtt)
-            .first()
-        )
+        capteur = db.query(Capteur).filter(Capteur.topic_mqtt == mesure.topic_mqtt).first()
     if not capteur:
         raise HTTPException(
             status_code=404,
@@ -76,8 +71,8 @@ def receive_mesure(mesure: MesureCreate, db: Session = Depends(get_db)):
         lot_id=lot.id if lot else None,
         source=mesure.source,
         topic_mqtt=capteur.topic_mqtt,
-        date_mesure=mesure.date_mesure or datetime.now(timezone.utc),
-        date_reception=datetime.now(timezone.utc),
+        date_mesure=mesure.date_mesure or datetime.now(UTC),
+        date_reception=datetime.now(UTC),
         temperature_c=mesure.temperature_c,
         humidite_pct=mesure.humidite_pct,
         donnees_brutes=mesure.donnees_brutes,
@@ -85,7 +80,7 @@ def receive_mesure(mesure: MesureCreate, db: Session = Depends(get_db)):
     db.add(db_mesure)
 
     # 5. Mise à jour de la dernière communication du capteur
-    capteur.derniere_communication = datetime.now(timezone.utc)
+    capteur.derniere_communication = datetime.now(UTC)
     db.add(capteur)
 
     # 6. Détection d'anomalies par rapport à la bande idéale du pays (cible ± tolérance)
@@ -105,14 +100,14 @@ def receive_mesure(mesure: MesureCreate, db: Session = Depends(get_db)):
 
 @router.get("/")
 def list_mesures(
-    entrepot_id: Optional[UUID] = None,
-    capteur_id: Optional[UUID] = None,
-    lot_id: Optional[UUID] = None,
-    date_mesure_depuis: Optional[datetime] = None,
-    date_mesure_jusqua: Optional[datetime] = None,
-    mis_a_jour_depuis: Optional[datetime] = None,
-    limit: Optional[int] = None,
-    offset: Optional[int] = None,
+    entrepot_id: UUID | None = None,
+    capteur_id: UUID | None = None,
+    lot_id: UUID | None = None,
+    date_mesure_depuis: datetime | None = None,
+    date_mesure_jusqua: datetime | None = None,
+    mis_a_jour_depuis: datetime | None = None,
+    limit: int | None = None,
+    offset: int | None = None,
     db: Session = Depends(get_db),
 ):
     limit, offset = get_pagination(limit, offset)
@@ -130,12 +125,7 @@ def list_mesures(
     if mis_a_jour_depuis is not None:
         query = query.filter(Mesure.mis_a_jour_le > mis_a_jour_depuis)
     total = query.count()
-    items = (
-        query.order_by(Mesure.date_mesure.desc())
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
+    items = query.order_by(Mesure.date_mesure.desc()).offset(offset).limit(limit).all()
     return paginated_response(items, total, limit, offset)
 
 

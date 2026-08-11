@@ -53,7 +53,6 @@ def test_creation_exploitation_reservee_admin(client, utilisateurs, pays_referen
 
 
 def test_reaffectation_entrepot_reservee_admin(client, utilisateurs, entrepot_bra, exploitation_bra, pays_reference):
-    from datetime import datetime, timezone
     from uuid import uuid4
 
     from app.database.db import SessionLocal

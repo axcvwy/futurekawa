@@ -73,11 +73,7 @@ def create_capteur(
         entrepot_central_id=payload.entrepot_id,
         corps=payload.model_dump(exclude={"pays_id"}),
     )
-    capteur = (
-        db.query(Capteur)
-        .filter(Capteur.pays_id == entrepot.pays_id, Capteur.source_id == resultat["id"])
-        .first()
-    )
+    capteur = db.query(Capteur).filter(Capteur.pays_id == entrepot.pays_id, Capteur.source_id == resultat["id"]).first()
     if capteur is None:
         return resultat
     return capteur

@@ -5,7 +5,6 @@ Bande idéale Colombie : 26 ± 3 °C (23–29 °C), humidité 80 ± 2 % (78–82
 """
 
 from app.models.alerte import Alerte
-from app.models.mesure import Mesure
 from app.services.alertes import detecter_anomalies_conditions
 
 
@@ -54,7 +53,7 @@ def test_repeated_high_temperature_does_not_duplicate_alerts_or_emails(
 
     alertes = db.query(Alerte).filter(Alerte.type_alerte == "TEMPERATURE_ELEVEE").all()
     actives = [a for a in alertes if a.statut == "ACTIVE"]
-    assert len(alertes) == 1           # pas de doublon
+    assert len(alertes) == 1  # pas de doublon
     assert len(actives) == 1
     assert len(_neutraliser_envoi_email) == 1  # pas de 2e e-mail
 

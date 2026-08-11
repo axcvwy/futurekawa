@@ -3,23 +3,14 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.database.db import engine, Base, SessionLocal
-
-from app.models.pays import Pays
-from app.models.entrepot import Entrepot
-from app.models.capteur import Capteur
-from app.models.lot import Lot
-from app.models.mesure import Mesure
-from app.models.alerte import Alerte
-
-from app.api.routes.entrepots import router as entrepot_router
+from app.api.routes.alertes import router as alerte_router
 from app.api.routes.capteurs import router as capteur_router
+from app.api.routes.entrepots import router as entrepot_router
 from app.api.routes.lots import router as lot_router
 from app.api.routes.mesures import router as mesure_router
-from app.api.routes.alertes import router as alerte_router
-
-from app.services.seed import seed_pays
+from app.database.db import Base, SessionLocal, engine
 from app.services.alertes import boucle_verification_lots_anciens, run_verification_lots_anciens
+from app.services.seed import seed_pays
 
 try:
     Base.metadata.create_all(bind=engine)

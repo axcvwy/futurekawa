@@ -1,6 +1,6 @@
 # app/routes/alerte.py
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import requests
 from fastapi import APIRouter, Depends, HTTPException
@@ -87,7 +87,7 @@ def update_alerte(
     if payload.commentaire_resolution is not None:
         alerte.commentaire_resolution = payload.commentaire_resolution
     if payload.statut == "RESOLUE" and alerte.date_resolution is None:
-        alerte.date_resolution = datetime.now(timezone.utc)
+        alerte.date_resolution = datetime.now(UTC)
 
     transfert_local = "OK"
     pays = db.get(Pays, alerte.pays_id) if alerte.pays_id else None

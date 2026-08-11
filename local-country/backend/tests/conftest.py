@@ -6,8 +6,7 @@ de la base de dev (futurekawa_local). L'envoi réel d'e-mails est neutralisé.
 """
 
 import os
-from datetime import date, datetime, timedelta, timezone
-from uuid import uuid4
+from datetime import UTC, date, datetime, timedelta
 
 import pytest
 
@@ -20,14 +19,14 @@ os.environ["API_KEY"] = "cle-test"
 # Empêche la boucle de surveillance périodique de tourner pendant les tests
 os.environ["ALERTE_LOTS_INTERVAL_SECONDS"] = "3600"
 
-from app.database.db import Base, SessionLocal, engine, get_db  # noqa: E402
-from app.models.alerte import Alerte  # noqa: E402
-from app.models.capteur import Capteur  # noqa: E402
-from app.models.entrepot import Entrepot  # noqa: E402
-from app.models.lot import Lot  # noqa: E402
-from app.models.mesure import Mesure  # noqa: E402
-from app.models.pays import Pays  # noqa: E402
-from app.services.seed import PAYS_DEFAULTS, seed_pays  # noqa: E402
+from app.database.db import Base, SessionLocal, engine
+from app.models.alerte import Alerte
+from app.models.capteur import Capteur
+from app.models.entrepot import Entrepot
+from app.models.lot import Lot
+from app.models.mesure import Mesure
+from app.models.pays import Pays
+from app.services.seed import PAYS_DEFAULTS
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -80,6 +79,7 @@ def _neutraliser_envoi_email(monkeypatch):
 @pytest.fixture(autouse=True)
 def _neutraliser_boucle(monkeypatch):
     """Empêche la boucle asynchrone LOT_TROP_ANCIEN de tourner pendant les tests."""
+
     async def _noop():
         import asyncio
 
@@ -100,6 +100,7 @@ def client():
     from main import app
 
     if not app_dependency_override_installe:
+
         def _override():
             db = SessionLocal()
             try:
@@ -196,7 +197,7 @@ def lot_ancien_col(entrepot_col) -> Lot:
             entrepot_id=entrepot_col.id,
             produit="Café Green Ancient",
             quantite_kg=800.0,
-            date_stockage=date.today() - timedelta(days=366),  # > 365 jours
+            date_stockage=datetime.now(UTC).date() - timedelta(days=366),  # > 365 jours
             statut="EN_STOCK",
         )
         db.add(lot)

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -27,15 +26,15 @@ class EntrepotCreate(BaseModel):
 
 
 class EntrepotUpdate(BaseModel):
-    nom: Optional[str] = None
-    ville: Optional[str] = None
-    code_pays: Optional[str] = None
-    nom_responsable: Optional[str] = None
-    email_responsable: Optional[str] = None
-    temperature_min_c: Optional[float] = None
-    temperature_max_c: Optional[float] = None
-    humidite_min_pct: Optional[float] = None
-    humidite_max_pct: Optional[float] = None
+    nom: str | None = None
+    ville: str | None = None
+    code_pays: str | None = None
+    nom_responsable: str | None = None
+    email_responsable: str | None = None
+    temperature_min_c: float | None = None
+    temperature_max_c: float | None = None
+    humidite_min_pct: float | None = None
+    humidite_max_pct: float | None = None
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -49,9 +48,9 @@ def create_entrepot(entrepot: EntrepotCreate, db: Session = Depends(get_db)):
 
 @router.get("/")
 def list_entrepots(
-    mis_a_jour_depuis: Optional[datetime] = None,
-    limit: Optional[int] = None,
-    offset: Optional[int] = None,
+    mis_a_jour_depuis: datetime | None = None,
+    limit: int | None = None,
+    offset: int | None = None,
     db: Session = Depends(get_db),
 ):
     limit, offset = get_pagination(limit, offset)
@@ -59,12 +58,7 @@ def list_entrepots(
     if mis_a_jour_depuis is not None:
         query = query.filter(Entrepot.mis_a_jour_le > mis_a_jour_depuis)
     total = query.count()
-    items = (
-        query.order_by(Entrepot.mis_a_jour_le.asc())
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
+    items = query.order_by(Entrepot.mis_a_jour_le.asc()).offset(offset).limit(limit).all()
     return paginated_response(items, total, limit, offset)
 
 

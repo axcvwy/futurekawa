@@ -1,6 +1,8 @@
 # tests/test_alertes.py
 """Règles de traitement des alertes par rôle."""
 
+from datetime import UTC
+
 
 def test_statut_invalide_400(client, en_tete_admin, alerte_bra):
     reponse = client.patch(
@@ -71,7 +73,7 @@ def test_resp_entrepot_ne_peut_pas_ignorer(client, utilisateurs, alerte_bra):
 
 
 def test_alerte_hors_pays_403_pour_qualite_col(client, utilisateurs, alerte_bra, pays_reference, entrepot_bra):
-    from datetime import datetime, timezone
+    from datetime import datetime
     from uuid import uuid4
 
     from app.database.db import SessionLocal
@@ -91,10 +93,10 @@ def test_alerte_hors_pays_403_pour_qualite_col(client, utilisateurs, alerte_bra,
             valeur_detectee=30.0,
             seuil_minimum=23.0,
             seuil_maximum=29.0,
-            date_declenchement=datetime.now(timezone.utc),
+            date_declenchement=datetime.now(UTC),
             email_envoye=False,
-            source_cree_le=datetime.now(timezone.utc),
-            source_mis_a_jour_le=datetime.now(timezone.utc),
+            source_cree_le=datetime.now(UTC),
+            source_mis_a_jour_le=datetime.now(UTC),
         )
         db.add(alerte_col)
         db.commit()

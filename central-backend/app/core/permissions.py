@@ -1,18 +1,17 @@
 # app/core/permissions.py
-from typing import Optional
 from uuid import UUID
 
 from app.models.utilisateur import Utilisateur
 
 
-def pays_autorise(utilisateur: Utilisateur) -> Optional[UUID]:
+def pays_autorise(utilisateur: Utilisateur) -> UUID | None:
     """Pays auquel l'utilisateur est restreint (None = aucun filtre, vue globale)."""
     if utilisateur.role == "ADMIN_SIEGE":
         return None
     return utilisateur.pays_id
 
 
-def entrepot_autorise(utilisateur: Utilisateur) -> Optional[UUID]:
+def entrepot_autorise(utilisateur: Utilisateur) -> UUID | None:
     """Entrepôt auquel un RESPONSABLE_ENTREPOT est restreint (None = aucun filtre)."""
     if utilisateur.role == "RESPONSABLE_ENTREPOT":
         return utilisateur.entrepot_id

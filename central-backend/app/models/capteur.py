@@ -10,9 +10,7 @@ class Capteur(UUIDTimestampMixin, Base):
     """Copie centrale d'un capteur IoT local."""
 
     __tablename__ = "capteurs"
-    __table_args__ = (
-        UniqueConstraint("pays_id", "source_id", name="uq_capteurs_pays_source"),
-    )
+    __table_args__ = (UniqueConstraint("pays_id", "source_id", name="uq_capteurs_pays_source"),)
 
     pays_id = Column(Uuid(as_uuid=True), ForeignKey("pays.id", ondelete="CASCADE"), nullable=False, index=True)
     entrepot_id = Column(Uuid(as_uuid=True), ForeignKey("entrepots.id", ondelete="CASCADE"), nullable=False, index=True)

@@ -6,7 +6,7 @@ from app.config import DATABASE_URL
 
 engine = create_engine(
     DATABASE_URL,
-    pool_pre_ping=True,   # Vérifie la connexion avant usage (idéal avec le pooler Supabase)
+    pool_pre_ping=True,  # Vérifie la connexion avant usage (idéal avec le pooler Supabase)
     pool_size=5,
     max_overflow=5,
 )

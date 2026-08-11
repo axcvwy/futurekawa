@@ -145,7 +145,6 @@ def test_modification_perimetre(client, en_tete_admin, pays_reference):
 
 
 def test_impossible_de_supprimer_son_propre_compte(client, en_tete_admin, pays_reference):
-    from tests.conftest import creer_utilisateur
 
     admin = None
     from app.database.db import SessionLocal

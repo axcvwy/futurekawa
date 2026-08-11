@@ -30,12 +30,17 @@ lerna-debug.log*
 #  Logs 
 logs
 *.log
+!docs/preuve-execution/console-output.log
 
 #  Bases & états d'exécution 
 *.sqlite3
 *.db
 mosquitto/data/
 mosquitto/log/
+
+#  Sorties pipeline / CI-CD 
+rapports/
+artefacts/
 
 #  Node-RED 
 node-red/data/node_modules/

@@ -19,7 +19,7 @@ class Pays(UUIDTimestampMixin, Base):
     mock = Column(Boolean, nullable=False, default=False)  # True => données simulées, pas d'appel HTTP
     intervalle_sync_secondes = Column(Integer, nullable=False, default=300)
     derniere_sync_reussie_le = Column(DateTime(timezone=True), nullable=True)
-    dernier_statut_sync = Column(String(30), nullable=False, default="JAMAIS")  # JAMAIS / SUCCES / SUCCES_PARTIEL / ECHEC
+    dernier_statut_sync = Column(String(30), nullable=False, default="JAMAIS")  # statuts possibles ci-dessous
     derniere_erreur_sync = Column(Text, nullable=True)
 
     # Conditions idéales de conservation du café (par pays) + tolérance acceptable.

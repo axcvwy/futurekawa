@@ -10,9 +10,7 @@ class Entrepot(UUIDTimestampMixin, Base):
     """Copie centrale d'un entrepôt local."""
 
     __tablename__ = "entrepots"
-    __table_args__ = (
-        UniqueConstraint("pays_id", "source_id", name="uq_entrepots_pays_source"),
-    )
+    __table_args__ = (UniqueConstraint("pays_id", "source_id", name="uq_entrepots_pays_source"),)
 
     pays_id = Column(Uuid(as_uuid=True), ForeignKey("pays.id", ondelete="CASCADE"), nullable=False, index=True)
     exploitation_id = Column(
