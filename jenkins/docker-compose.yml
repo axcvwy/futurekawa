@@ -1,0 +1,25 @@
+# Jenkins local pour exécuter la pipeline FutureKawa (Docker-outside-of-Docker)
+#   docker compose -f jenkins/docker-compose.yml up -d --build
+#   http://localhost:8080
+#   Mot de passe initial : docker compose -f jenkins/docker-compose.yml exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+
+services:
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: jenkins-futurekawa:local
+    container_name: jenkins
+    restart: unless-stopped
+    user: root          # accès au socket Docker hôte pour le test local
+    ports:
+      - "8080:8080"    # interface web Jenkins
+      - "50000:50000"  # agents JNLP (standard)
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      DOCKER_HOST: unix:///var/run/docker.sock
+
+volumes:
+  jenkins_data:

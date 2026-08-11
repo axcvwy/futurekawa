@@ -5,10 +5,11 @@ pipeline {
         // Dépôt d'images cible (à adapter : Docker Hub, GHCR, registry interne…)
         REGISTRY = 'futurekawa'
         // Bases de test provisionnées par le conteneur Postgres de la pipeline.
-        // Le port 5432 est publié sur l'hôte : la connexion 'localhost:5432' est identique
-        // à la prérequis documentée dans scripts/test-*.sh et docs/plan-de-tests.md.
-        TEST_DATABASE_URL_LOCAL = 'postgresql+psycopg2://futurekawa:futurekawa@localhost:5432/futurekawa_local_test'
-        TEST_DATABASE_URL_CENTRAL = 'postgresql+psycopg2://futurekawa:futurekawa@localhost:5432/futurekawa_central_test'
+        // Port hôte 5433 (évite le conflit avec le Postgres de dev sur 5432).
+        // host.docker.internal : adresse de l'hôte vue DEPUIS le conteneur Jenkins
+        // (Docker Desktop macOS/Windows). Les tests tournent dans ce conteneur.
+        TEST_DATABASE_URL_LOCAL = 'postgresql+psycopg2://futurekawa:futurekawa@host.docker.internal:5433/futurekawa_local_test'
+        TEST_DATABASE_URL_CENTRAL = 'postgresql+psycopg2://futurekawa:futurekawa@host.docker.internal:5433/futurekawa_central_test'
         // Artefacts livrables de la démo
         ARTEFACTS_DIR = 'artefacts'
         // Tag d'image Docker (horodaté pour tracer la livraison)
@@ -25,11 +26,11 @@ pipeline {
         stage('Provisionnement des bases de test') {
             steps {
                 script {
-                    // Conteneur Postgres partagé : utilisateur/mdp futurekawa, port 5432 publié.
-                    // Deux bases créées : futurekawa_local_test + futurekawa_central_test.
+                    // Conteneur Postgres partagé : user/mdp futurekawa, port hôte 5433
+                    // (5432 laissé libre pour le Postgres de dev). Deux bases de test créées.
                     sh """
                         docker rm -f futurekawa-testdb 2>/dev/null || true
-                        docker run -d --name futurekawa-testdb -p 5432:5432 \
+                        docker run -d --name futurekawa-testdb -p 5433:5432 \
                           -e POSTGRES_USER=futurekawa -e POSTGRES_PASSWORD=futurekawa \
                           -e POSTGRES_DB=futurekawa postgres:16-alpine
                         # On attend que Postgres soit prêt avant de créer les bases de test.

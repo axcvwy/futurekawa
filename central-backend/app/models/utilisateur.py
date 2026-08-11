@@ -5,11 +5,6 @@ from sqlalchemy.orm import relationship
 from app.database.db import Base
 from app.models.base import UUIDTimestampMixin
 
-# Rôles métier (cf. organigramme + cahier des charges) :
-#   ADMIN_SIEGE              -> plateforme + vue consolidée globale
-#   RESPONSABLE_EXPLOITATION -> pays/exploitation assigné (réception des e-mails d'alerte)
-#   RESPONSABLE_ENTREPOT     -> entrepôt assigné (opérations quotidiennes)
-#   REFERENT_QUALITE         -> pays/exploitation assigné (alertes qualité, traçabilité)
 ROLES = (
     "ADMIN_SIEGE",
     "RESPONSABLE_EXPLOITATION",
@@ -29,11 +24,6 @@ class Utilisateur(UUIDTimestampMixin, Base):
     role = Column(String(30), nullable=False)
     actif = Column(Boolean, nullable=False, default=True)
 
-    # Périmètre d'action :
-    #   - ADMIN_SIEGE              : pays_id / entrepot_id None (tous les pays)
-    #   - RESPONSABLE_EXPLOITATION : pays_id obligatoire
-    #   - REFERENT_QUALITE         : pays_id obligatoire
-    #   - RESPONSABLE_ENTREPOT     : pays_id + entrepot_id obligatoires
     pays_id = Column(
         Uuid(as_uuid=True),
         ForeignKey("pays.id", ondelete="SET NULL"),

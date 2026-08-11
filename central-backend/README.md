@@ -80,7 +80,6 @@ Endpoints de gestion des comptes (réservés à `ADMIN_SIEGE`) :
 ---
 
 ## 🏭 Endpoints exposés & Matrice CRUD
-L'API est découpée en 4 sections majeures respectant l'ensemble du cahier des charges de la MSPR :
 
 1. Consolidation Stocks (FIFO)
 GET /api/central/stocks : Agrégation mondiale des stocks triés par date d'entrée (Algorithme FIFO).
