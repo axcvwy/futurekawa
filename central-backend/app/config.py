@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-# Base de données PostgreSQL centrale (Supabase)
+# Base de données PostgreSQL centrale
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise RuntimeError(
@@ -25,6 +25,9 @@ SCHEDULER_POLL_SECONDS = int(os.getenv("SCHEDULER_POLL_SECONDS", "30"))  # Caden
 # Authentification (JWT) de la console Siège
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-secret-a-changer-en-production")
 JWT_EXPIRATION_MINUTES = int(os.getenv("JWT_EXPIRATION_MINUTES", "480"))  # 8 h
+
+# Clé machine-to-machine du flux d'intégration ERP (header X-ERP-Key).
+ERP_API_KEY = os.getenv("ERP_API_KEY", "futurekawa-erp-dev-key")
 
 
 PAYS_DEFAULTS = [

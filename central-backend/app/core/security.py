@@ -5,10 +5,11 @@ from datetime import UTC, datetime, timedelta
 import bcrypt
 import jwt
 from dotenv import load_dotenv
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from app.config import ERP_API_KEY
 from app.database.db import get_db
 from app.models.utilisateur import Utilisateur
 
@@ -102,3 +103,16 @@ def require_role(*roles: str):
 
 def est_admin(utilisateur: Utilisateur) -> bool:
     return utilisateur.role == "ADMIN_SIEGE"
+
+
+def verifier_cle_erp(x_erp_key: str | None = Header(default=None, alias="X-ERP-Key")) -> None:
+    """Authentifie un appel machine-to-machine de l'ERP via le header X-ERP-Key.
+
+    Hormis le header, les endpoints ERP ne reposent sur aucun état de session :
+    l'ERP tire les données consolidées (stocks, alertes, mesures) sans compte JWT.
+    """
+    if not x_erp_key or x_erp_key != ERP_API_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Clé X-ERP-Key invalide ou manquante",
+        )

@@ -14,6 +14,7 @@ from app.routes import (
     auth,
     capteur,
     entrepot,
+    erp,
     exploitation,
     lot,
     mesure,
@@ -81,6 +82,7 @@ app.include_router(lot.router)
 app.include_router(mesure.router)
 app.include_router(alerte.router)
 app.include_router(synchronisation.router)
+app.include_router(erp.router)
 
 
 @app.get("/", tags=["Vérification Santé (Heartbeat)"])

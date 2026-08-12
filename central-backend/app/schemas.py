@@ -344,3 +344,71 @@ class UtilisateurUpdate(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+#  Schémas du flux d'intégration ERP (machine-to-machine, X-ERP-Key)
+
+class ERPStockOut(BaseModel):
+    """Stock consolidé, vu par l'ERP (un lot = une ligne)."""
+
+    lot_id: str  # code_lot du pays (identifiant métier partagé)
+    country_code: str
+    country_name: str
+    exploitation: str
+    warehouse: str
+    product: str
+    quantity_kg: float
+    storage_date: date
+    status: str
+    active_alert_count: int
+    last_temperature_c: float | None = None
+    last_humidity_pct: float | None = None
+    last_sync_at: datetime
+
+
+class ERPAlerteOut(BaseModel):
+    """Exception qualité / conservation, vue par l'ERP."""
+
+    lot_id: str | None
+    country_code: str
+    warehouse: str
+    type: str
+    level: str
+    status: str
+    message: str
+    detected_value: float | None = None
+    min_threshold: float | None = None
+    max_threshold: float | None = None
+    triggered_at: datetime
+    resolved_at: datetime | None = None
+
+
+class ERPMesureOut(BaseModel):
+    """Historique de mesures d'un entrepôt, vu par l'ERP."""
+
+    country_code: str
+    warehouse: str
+    warehouse_id: uuid.UUID  # référence interne, utile pour le rapprochement ERP
+    sensor_reference: str | None = None
+    source: str
+    topic_mqtt: str
+    recorded_at: datetime
+    temperature_c: float
+    humidity_pct: float
+
+
+class ERPStockListOut(BaseModel):
+    generated_at: datetime
+    source: str
+    lots: list[ERPStockOut]
+
+
+class ERPAlerteListOut(BaseModel):
+    generated_at: datetime
+    source: str
+    alertes: list[ERPAlerteOut]
+
+
+class ERPMesureListOut(BaseModel):
+    generated_at: datetime
+    source: str
+    mesures: list[ERPMesureOut]

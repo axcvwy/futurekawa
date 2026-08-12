@@ -77,7 +77,22 @@ Bande idéale Colombie : **26 ± 3 °C** (23–29 °C), humidité **80 ± 2 %** 
 | AUT-CEN-07 | Intégration / Utilisateurs | `test_utilisateurs.py` (13 tests) | CRUD utilisateurs | Rubriques, 409 doublons, 400, impossibilité de supprimer son compte |
 | AUT-CEN-08 | Intégration / Lots | `test_lots.py` (8 tests) | Création/mutation des lots | Périmètre, statuts, mode simulation 400 |
 
-**Total backend central : 53 tests (51 existants + 2 nouveaux en synchronisation).**
+### 2.2bis Flux d'intégration ERP — `central-backend/app/routes/erp.py`
+
+Contrats plats orientés consommateur externe (SAP / MS Dynamics / mock), authentifiés
+par header `X-ERP-Key` (aucun compte JWT) : stocks consolidés, alertes qualité,
+historique de mesures. Cf. `tests/test_erp.py`.
+
+| ID | Type | Fichier / Test | Scénario | Critère de réussite |
+|---|---|---|---|---|
+| AUT-ERP-01 | Sécurité | `test_erp_sans_cle_repond_401` | Appel `/erp/stocks` sans header | 401 |
+| AUT-ERP-02 | Sécurité | `test_erp_avec_mauvaise_cle_repond_401` | Clé X-ERP-Key invalide | 401 |
+| AUT-ERP-03 | Intégration / Stock | `test_erp_stocks_consolides` | Lot BRA + alerte ACTIVE + 1 mesure | Contrat complet : pays, exploitation, entrepôt, `active_alert_count=1`, dernières T°/H% |
+| AUT-ERP-04 | Intégration / Stock | `test_erp_stock_lot_inconnu_404` | Code lot inexistant `LOT-INCONNU` | 404 |
+| AUT-ERP-05 | Intégration / Alertes | `test_erp_alertes_consolidees` | Alerte BRA ACTIVE | `type/level/status`, `lot_id` métier, `detected_value` |
+| AUT-ERP-06 | Intégration / Mesures | `test_erp_mesures_historique` | 2 mesures CAP-BRA-001 | Historique ordonné (récent → ancien), capteur rattaché |
+
+**Total backend central : 59 tests (51 existants + 2 synchronisation + 6 flux ERP).**
 
 ### 2.3 Frontend central — `central-frontend/tests/`
 
@@ -100,6 +115,7 @@ Bande idéale Colombie : **26 ± 3 °C** (23–29 °C), humidité **80 ± 2 %** 
 | Collecte MQTT / Node-RED → API locale | AUT-LOC-09 à 12 |
 | Synchronisation Siège ⇄ pays | AUT-CEN-01, 02 |
 | Authentification & RBAC (rôles) | AUT-CEN-03 à 07 |
+| Intégration ERP : stocks / alertes / mesures (X-ERP-Key) | AUT-ERP-01 à 06 |
 | Console web Siège | AUT-UI-01 à 03 |
 
 ---
@@ -124,7 +140,7 @@ _Certaines anomalies (ANO-03/04) relèvent du manuel : voir `docs/tests-manuels.
 Les sorties des suites (pytest / Vitest / build) tiennent lieu de rapport :
 
 - Backend local : `py.test` → `14 passed`
-- Backend central : `py.test` → `53 passed`
+- Backend central : `py.test` → `59 passed` (dont 6 du flux ERP)
 - Frontend : `vitest run` → `5 passed` puis `npm run build` → ✓ built
 
 Le script `./scripts/test-all.sh` aggrège les trois et affiche un résumé final.
