@@ -345,7 +345,9 @@ class UtilisateurUpdate(BaseModel):
 class MessageResponse(BaseModel):
     message: str
 
+
 #  Schémas du flux d'intégration ERP (machine-to-machine, X-ERP-Key)
+
 
 class ERPStockOut(BaseModel):
     """Stock consolidé, vu par l'ERP (un lot = une ligne)."""
