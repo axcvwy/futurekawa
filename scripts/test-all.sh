@@ -6,7 +6,7 @@ set -euo pipefail
 racine="$(cd "$(dirname "$0")/.." && pwd)"
 date_debut=$(date +%s)
 
-echo "  1/3  Backend local (Colombie) - pytest"
+echo "  1/3  Backend local (Pays) - pytest"
 "$racine/scripts/test-local.sh"
 
 echo

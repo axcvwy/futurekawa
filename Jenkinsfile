@@ -59,7 +59,7 @@ pipeline {
 
         stage('Tests automatisés') {
             parallel {
-                stage('Backend local (Colombie)') {
+                stage('Backend local (Pays)') {
                     steps {
                         sh 'cd local-country/backend && TEST_DATABASE_URL=${TEST_DATABASE_URL_LOCAL} ../.venv/bin/python -m pytest -v --tb=short'
                     }
